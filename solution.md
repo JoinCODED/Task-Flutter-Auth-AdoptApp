@@ -76,13 +76,13 @@ class AuthProvider extends ChangeNotifier {
 }
 ```
 
-1.  In your `services` folder, create a new file `auth.dart` and initialize a `dio` instance.
+11.  In your `services` folder, create a new file `client.dart` and initialize a `dio` instance, pass it base url, and create a singleton for it.
 
 ```dart
-class AuthServices {
-  final Dio _dio = Dio();
+import 'package:dio/dio.dart';
 
-  final _baseUrl = 'http://10.0.2.2:5000';
+class Client {
+  static final Dio dio = Dio(BaseOptions(baseUrl: 'https://coded-pets-api-auth.herokuapp.com'));
 }
 ```
 
@@ -99,7 +99,7 @@ class AuthServices {
     late String token;
     try {
       Response response =
-          await _dio.post(_baseUrl + '/signup', data: user.toJson());
+          await Client.dio('/signup', data: user.toJson());
       token = response.data["token"];
     } on DioError catch (error) {
       print(error);
@@ -219,7 +219,7 @@ void main() {
     late String token;
     try {
       Response response =
-          await _dio.post(_baseUrl + '/signin', data: user.toJson());
+          await Client.dio('/signin', data: user.toJson());
       token = response.data["token"];
     } on DioError catch (error) {
       print(error);
@@ -473,38 +473,19 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 ### Adding Headers
 
-1. The two endpoints that requires auth are creating a pet and adopting.
-2. Call the token from `shared_preferences` and add them to your request headers.
+1. In your `isAuth` getter, after you check for the token validity, add the token to the dio client headers.
 
 ```dart
-  Future<Pet> createPet({required Pet pet}) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String token = prefs.getString('token') ?? "";
-
-    _dio.options.headers = {
-      HttpHeaders.authorizationHeader: 'Bearer $token',
-    };
-[...]
-```
-
-```dart
-  Future<Pet> createPet({required Pet pet}) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String token = prefs.getString('token') ?? "";
-
-    _dio.options.headers = {
-      HttpHeaders.authorizationHeader: 'Bearer $token',
-    };
-[...]
-```
-
-```dart
-  Future<Pet> adoptPet({required int petId}) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String token = prefs.getString('token') ?? "";
-
-    _dio.options.headers = {
-      HttpHeaders.authorizationHeader: 'Bearer $token',
-    };
+bool get isAuth {
+    getToken();
+    if (token.isNotEmpty && Jwt.getExpiryDate(token)!.isAfter(DateTime.now())) {
+      user = User.fromJson(Jwt.parseJwt(token));
+      Client.dio.options.headers = {
+        HttpHeaders.authorizationHeader: 'Bearer $token',
+      };
+      return true;
+    }
+    logout();
+    return false;
   }
 ```
