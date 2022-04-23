@@ -9,7 +9,7 @@
 1. Change your backend baseUrl to this:
 
 ```
-To add later
+https://coded-pets-api-auth.herokuapp.com
 ```
 
 ### Setup
@@ -70,12 +70,15 @@ flutter pub run build_runner build
 9. In your `providers` folder create a file called `auth_provider.dart`.
 10. Add 2 properties for now, a `String` `token` and initialize it with an empty string, and a `User` `user` property and mark it as `late`.
 
-11. In your `services` folder, create a new file `auth_services.dart` and initialize a `dio` instance.
-12. Create your `signup` function that returns a future String and takes `user` as an argument.
-13. Send a post request to `/signup` and pass the `user` argument using `.toJson` constructor.
-14. Return the token from the response object.
-15. Create the `signup` function in your `auth_provider` with a type of `void` and call our `signup` function from `auth_services.dart`.
-16. Assign the token coming from the response to your `token` property in the provider, and print the token in the console.
+11. In your `services` folder, create a new file `client.dart`.
+12. Initialize a dio instance, pass it the base url and create a singleton for it.
+13. Replace every `PetsServices()` in `services/pets.dart` with the singleton you just created.
+14. In your `services` folder, create a new file `auth_services.dart`.
+15. Create your `signup` function that returns a future String and takes `user` as an argument.
+16. Send a post request to `/signup` and pass the `user` argument using `.toJson` constructor.
+17. Return the token from the response object.
+18. Create the `signup` function in your `auth_provider` with a type of `void` and call our `signup` function from `auth_services.dart`.
+19. Assign the token coming from the response to your `token` property in the provider, and print the token in the console.
 
 ### Signup
 
@@ -133,5 +136,4 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 ### Adding Headers
 
-1. The two endpoints that requires auth are creating a pet and adopting.
-2. Call the token from `shared_preferences` and add them to your request headers.
+1. In your `isAuth` getter, after you check for the token validity, add the token to the dio client headers.
