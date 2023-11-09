@@ -9,7 +9,7 @@
 1. Change your backend baseUrl to this:
 
 ```
-https://coded-pets-api-auth.herokuapp.com
+https://coded-pets-api-auth.eapi.joincoded.com
 ```
 
 ### Setup
